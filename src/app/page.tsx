@@ -15,14 +15,18 @@ export default function Home() {
   }
 
 async function addProperty() {
-  await supabase.from('properties').insert({
+  const { error } = await supabase.from('properties').insert({
     name,
     lockbox_code: code + ' [ENCRYPTED LATER]',
-    access_instructions: 'Test instructions',
-    company_id: (await supabase.from('companies').select('id').eq('slug', 'magicmaids').single()).data?.id
+    access_instructions: 'Test instructions'
   })
-  setName(''); setCode('')
-  fetchProperties()
+  if (error) {
+    alert('Error: ' + error.message)
+  } else {
+    setName('')
+    setCode('')
+    fetchProperties()   // <-- this forces the list to refresh
+  }
 }
 
   return (
