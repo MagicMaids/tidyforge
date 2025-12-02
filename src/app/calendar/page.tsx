@@ -1,12 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
 import { supabase } from '@/lib/supabase'
 
 export default function CalendarPage() {
+  const [Calendar, setCalendar] = useState(null)
   const [jobs, setJobs] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
   const [selectedDate, setSelectedDate] = useState('')
@@ -16,6 +13,29 @@ export default function CalendarPage() {
   useEffect(() => {
     fetchJobs()
     fetchProperties()
+    // Dynamic load FullCalendar to avoid CSS import errors
+    import('@fullcalendar/react').then(({ default: FullCalendar }) => {
+      import('@fullcalendar/daygrid').then(({ default: dayGridPlugin }) => {
+        import('@fullcalendar/timegrid').then(({ default: timeGridPlugin }) => {
+          import('@fullcalendar/interaction').then(({ default: interactionPlugin }) => {
+            setCalendar(() => (props) => (
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                }}
+                events={props.events}
+                dateClick={props.dateClick}
+                height="auto"
+              />
+            ))
+          })
+        })
+      })
+    })
   }, [])
 
   async function fetchJobs() {
@@ -45,24 +65,17 @@ export default function CalendarPage() {
     backgroundColor: job.status === 'completed' ? '#10b981' : '#3b82f6'
   }))
 
+  const dateClick = (info) => {
+    setSelectedDate(info.dateStr)
+    setShowForm(true)
+  }
+
+  if (!Calendar) return <div className="p-8">Loading calendar...</div>
+
   return (
     <div className="p-8">
       <h1 className="text-4xl font-bold mb-8 text-blue-600">TidyForge Calendar</h1>
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        events={events}
-        dateClick={(info) => {
-          setSelectedDate(info.dateStr)
-          setShowForm(true)
-        }}
-        height="auto"
-      />
+      <Calendar events={events} dateClick={dateClick} />
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg max-w-md w-full">
