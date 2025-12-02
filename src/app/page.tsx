@@ -14,17 +14,16 @@ export default function Home() {
     setProperties(data || [])
   }
 
-  async function addProperty() {
-    const company = await supabase.from('companies').select('id').eq('slug', 'magicmaids').single()
-    await supabase.from('properties').insert({
-      company_id: company.data?.id,
-      name,
-      lockbox_code: code + ' [ENCRYPTED LATER]',
-      access_instructions: 'Test instructions'
-    })
-    setName(''); setCode('')
-    fetchProperties()
-  }
+async function addProperty() {
+  await supabase.from('properties').insert({
+    name,
+    lockbox_code: code + ' [ENCRYPTED LATER]',
+    access_instructions: 'Test instructions',
+    company_id: (await supabase.from('companies').select('id').eq('slug', 'magicmaids').single()).data?.id
+  })
+  setName(''); setCode('')
+  fetchProperties()
+}
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
