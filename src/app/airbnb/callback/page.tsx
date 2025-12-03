@@ -1,25 +1,22 @@
 'use client'
 import { useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 export default function AirbnbCallback() {
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const code = urlParams.get('code')
-    
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
     if (code) {
-      // In real app we'd exchange code for tokens via server
-      // For now, just show success
-      alert('Airbnb connected! In production this would save tokens securely.')
-      window.location.href = '/calendar'
+      alert(`SUCCESS! Airbnb code received: ${code.substring(0, 20)}...\n\nIn production this would exchange for tokens and save securely.`)
+      // In real app: send code to your Edge Function
     }
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-green-50 flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-green-600">Airbnb Connected Successfully!</h1>
-        <p className="mt-4">Taking you back to calendar...</p>
+        <h1 className="text-5xl font-bold text-green-600 mb-4">Airbnb Connected!</h1>
+        <p className="text-2xl">OAuth flow is working perfectly.</p>
+        <p className="mt-8">Next: real token exchange + auto-sync</p>
       </div>
     </div>
   )
